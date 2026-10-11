@@ -1,0 +1,13 @@
+{
+  "name": "notebook-system",
+  "version": "1.0.0",
+  "description": "Category-wise Notebook System with dedicated Movie Watchlist and Daily Study Trackers",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["notebook", "notes", "categories", "movies", "study", "tracker", "sqlite"],
+  "author": "",
+  "license": "MIT"
+}
