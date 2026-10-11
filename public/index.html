@@ -8,10 +8,23 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📓</text></svg>">
 </head>
 <body class="theme-light">
+  <!-- Apple Ambient Aurora Wallpaper Mesh (Subtle glowing orbs behind glass) -->
+  <div class="ambient-mesh-canvas" aria-hidden="true">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+    <div class="glow-orb orb-4"></div>
+  </div>
+
   <div class="app-container">
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR (Apple Translucent Vibrancy) -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
+        <div class="mac-window-controls" aria-hidden="true">
+          <span class="mac-dot mac-close"></span>
+          <span class="mac-dot mac-minimize"></span>
+          <span class="mac-dot mac-expand"></span>
+        </div>
         <div class="brand">
           <span class="brand-icon">📓</span>
           <div class="brand-text">
@@ -23,7 +36,7 @@
       </div>
 
       <div class="sidebar-action">
-        <button class="btn btn-primary btn-block" id="newNoteBtn">
+        <button class="btn btn-primary btn-block apple-btn-glow" id="newNoteBtn">
           <span class="btn-icon">＋</span> New Note
         </button>
       </div>
@@ -81,7 +94,7 @@
 
     <!-- MAIN WORKSPACE -->
     <main class="main-content">
-      <!-- TOP HEADER / CONTROLS -->
+      <!-- TOP HEADER / CONTROLS (Frosted Glass) -->
       <header class="top-header">
         <div class="top-header-left">
           <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">☰</button>
@@ -91,10 +104,10 @@
           </div>
         </div>
 
-        <!-- SEARCH BAR -->
+        <!-- SEARCH BAR (Pill Frosted Search) -->
         <div class="search-bar">
           <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" placeholder="Search notes, movies, study items, tags... (Cmd/Ctrl + K)" autocomplete="off">
+          <input type="text" id="searchInput" placeholder="Search notes, movies, study routines... (⌘K / Ctrl+K)" autocomplete="off">
           <button class="search-clear-btn" id="searchClearBtn" title="Clear search" style="display: none;">✕</button>
         </div>
 
@@ -102,13 +115,13 @@
           <button class="btn btn-outline" id="manageCategoriesBtn">
             ⚙️ Categories
           </button>
-          <button class="btn btn-primary new-note-header-btn" id="headerNewNoteBtn">
+          <button class="btn btn-primary new-note-header-btn apple-btn-glow" id="headerNewNoteBtn">
             ＋ Note
           </button>
         </div>
       </header>
 
-      <!-- STATS & INSIGHTS BANNER -->
+      <!-- STATS & INSIGHTS BANNER (Liquid Glass Widgets) -->
       <section class="stats-banner" id="statsBanner">
         <div class="stat-pill" id="statTotalNotes">
           <span class="stat-icon">📝</span>
@@ -192,43 +205,48 @@
         </div>
       </div>
 
-      <!-- NOTES GRID CONTAINER -->
+      <!-- NOTES CONTAINER (Apple Liquid Glass Cards) -->
       <section class="notes-container grid-view" id="notesContainer">
         <!-- Dynamic Note Cards rendered here -->
       </section>
 
       <!-- EMPTY STATE -->
       <div class="empty-state" id="emptyState" style="display: none;">
-        <div class="empty-state-icon">📝</div>
+        <div class="empty-state-icon">✨</div>
         <h3 class="empty-state-title">No notes found</h3>
         <p class="empty-state-desc">Start building your notebook by adding your first note, movie, or study checklist!</p>
-        <button class="btn btn-primary" id="emptyStateNewNoteBtn">＋ Create a Note</button>
+        <button class="btn btn-primary apple-btn-glow" id="emptyStateNewNoteBtn">＋ Create a Note</button>
       </div>
     </main>
   </div>
 
-  <!-- NOTE MODAL (CREATE / EDIT) -->
+  <!-- NOTE MODAL (Apple VisionOS / macOS 26 Floating Sheet) -->
   <div class="modal-backdrop" id="noteModal" style="display: none;">
     <div class="modal-card modal-lg">
       <div class="modal-header">
-        <h2 class="modal-title" id="noteModalTitle">Create Note</h2>
-        <button class="icon-btn modal-close-btn" id="closeNoteModalBtn">✕</button>
+        <div class="modal-header-left">
+          <span class="modal-badge-icon">✍️</span>
+          <h2 class="modal-title" id="noteModalTitle">Create Note</h2>
+        </div>
+        <button class="icon-btn modal-close-btn" id="closeNoteModalBtn" aria-label="Close modal">✕</button>
       </div>
 
       <form id="noteForm">
         <input type="hidden" id="noteId" value="">
 
-        <!-- NOTE TYPE SELECTOR -->
-        <div class="type-selector-tabs">
-          <button type="button" class="tab-btn active" data-type="general">
-            📝 Standard Note
-          </button>
-          <button type="button" class="tab-btn" data-type="movie">
-            🎬 Movie / Watchlist
-          </button>
-          <button type="button" class="tab-btn" data-type="study">
-            📚 Daily Study Checklist
-          </button>
+        <!-- Apple Segmented Control for Note Types -->
+        <div class="segmented-control-wrapper">
+          <div class="type-selector-tabs apple-segmented-control">
+            <button type="button" class="tab-btn active" data-type="general">
+              📝 Standard Note
+            </button>
+            <button type="button" class="tab-btn" data-type="movie">
+              🎬 Movie / Watchlist
+            </button>
+            <button type="button" class="tab-btn" data-type="study">
+              📚 Daily Study Checklist
+            </button>
+          </div>
         </div>
 
         <div class="modal-body">
@@ -238,7 +256,7 @@
             <input type="text" id="formNoteTitle" class="form-input" placeholder="e.g. Interstellar, DSA Routine, System Design Notes" required>
           </div>
 
-          <!-- CATEGORY & PRIORITY & COLOR ROW -->
+          <!-- CATEGORY & PRIORITY & TINT ROW -->
           <div class="form-row form-row-3">
             <div class="form-group">
               <label for="formNoteCategory">Category</label>
@@ -255,14 +273,14 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="formNoteColor">Card Tint</label>
+              <label for="formNoteColor">Ambient Tint</label>
               <select id="formNoteColor" class="form-select">
-                <option value="default">Default</option>
-                <option value="#ffe4e6">Rose (Movies)</option>
-                <option value="#dbeafe">Blue (Study)</option>
-                <option value="#fef3c7">Amber (Ideas)</option>
-                <option value="#dcfce7">Mint (Work)</option>
-                <option value="#f3e8ff">Lavender (Personal)</option>
+                <option value="default">Neutral Glass</option>
+                <option value="#ffe4e6">Rose Luster (Movies)</option>
+                <option value="#dbeafe">Sapphire Frost (Study)</option>
+                <option value="#fef3c7">Amber Glow (Ideas)</option>
+                <option value="#dcfce7">Emerald Aura (Work)</option>
+                <option value="#f3e8ff">Lavender Mist (Personal)</option>
               </select>
             </div>
           </div>
@@ -270,7 +288,7 @@
           <!-- MOVIE SPECIFIC FIELDS -->
           <div class="type-section" id="movieFields" style="display: none;">
             <div class="section-divider">
-              <span>🎬 MOVIE & WATCHLIST DETAILS</span>
+              <span>🎬 MOVIE & WATCHLIST METRICS</span>
             </div>
             <div class="form-row form-row-3">
               <div class="form-group">
@@ -294,7 +312,7 @@
                   <option value="plan_to_watch">⏳ Plan to Watch</option>
                   <option value="watching">🍿 Watching Now</option>
                   <option value="watched">✅ Watched</option>
-                  <option value="favorite">⭐ Favorite / Must Watch</option>
+                  <option value="favorite">⭐ Favorite / Masterpiece</option>
                 </select>
               </div>
               <div class="form-group">
@@ -338,11 +356,11 @@
             </div>
           </div>
 
-          <!-- CHECKLIST BUILDER (FOR STUDY & OPTIONAL FOR ALL) -->
+          <!-- CHECKLIST BUILDER -->
           <div class="form-group" id="checklistSection">
             <div class="checklist-header">
               <label>Checklist Tasks / Daily Items</label>
-              <span class="help-text">Add actionable items (can be checked off directly from the card!)</span>
+              <span class="help-text">Can be checked off directly on the glass card</span>
             </div>
             <div class="checklist-items-builder" id="checklistBuilder">
               <!-- Checklist item rows populated here -->
@@ -384,7 +402,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-outline" id="cancelNoteModalBtn">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="saveNoteBtn">Save Note</button>
+          <button type="submit" class="btn btn-primary apple-btn-glow" id="saveNoteBtn">Save Note</button>
         </div>
       </form>
     </div>
@@ -394,7 +412,10 @@
   <div class="modal-backdrop" id="categoryModal" style="display: none;">
     <div class="modal-card">
       <div class="modal-header">
-        <h2 class="modal-title" id="catModalTitle">Manage Categories</h2>
+        <div class="modal-header-left">
+          <span class="modal-badge-icon">🗂️</span>
+          <h2 class="modal-title" id="catModalTitle">Manage Categories</h2>
+        </div>
         <button class="icon-btn modal-close-btn" id="closeCatModalBtn">✕</button>
       </div>
 
@@ -437,14 +458,14 @@
             <div class="form-group">
               <label for="catColorInput">Theme Color</label>
               <div class="color-picker-container">
-                <input type="color" id="catColorInput" class="color-picker" value="#6366f1">
+                <input type="color" id="catColorInput" class="color-picker" value="#0071e3">
                 <div class="color-presets">
-                  <span class="preset-color" data-color="#f43f5e" style="background:#f43f5e"></span>
-                  <span class="preset-color" data-color="#3b82f6" style="background:#3b82f6"></span>
-                  <span class="preset-color" data-color="#eab308" style="background:#eab308"></span>
-                  <span class="preset-color" data-color="#10b981" style="background:#10b981"></span>
-                  <span class="preset-color" data-color="#8b5cf6" style="background:#8b5cf6"></span>
-                  <span class="preset-color" data-color="#06b6d4" style="background:#06b6d4"></span>
+                  <span class="preset-color" data-color="#ff3b30" style="background:#ff3b30"></span>
+                  <span class="preset-color" data-color="#0071e3" style="background:#0071e3"></span>
+                  <span class="preset-color" data-color="#ff9500" style="background:#ff9500"></span>
+                  <span class="preset-color" data-color="#34c759" style="background:#34c759"></span>
+                  <span class="preset-color" data-color="#af52de" style="background:#af52de"></span>
+                  <span class="preset-color" data-color="#5ac8fa" style="background:#5ac8fa"></span>
                 </div>
               </div>
             </div>
@@ -457,7 +478,7 @@
 
           <div class="cat-form-actions">
             <button type="button" class="btn btn-outline" id="resetCatFormBtn" style="display: none;">Cancel Edit</button>
-            <button type="submit" class="btn btn-primary" id="saveCatBtn">Save Category</button>
+            <button type="submit" class="btn btn-primary apple-btn-glow" id="saveCatBtn">Save Category</button>
           </div>
         </form>
       </div>
@@ -468,11 +489,14 @@
   <div class="modal-backdrop" id="backupModal" style="display: none;">
     <div class="modal-card">
       <div class="modal-header">
-        <h2 class="modal-title">Backup & Restore</h2>
+        <div class="modal-header-left">
+          <span class="modal-badge-icon">💾</span>
+          <h2 class="modal-title">Backup & Restore</h2>
+        </div>
         <button class="icon-btn modal-close-btn" id="closeBackupModalBtn">✕</button>
       </div>
       <div class="modal-body">
-        <p class="backup-lead">Safely export all your notes and categories to a JSON backup file or restore from an existing backup.</p>
+        <p class="backup-lead">Safely export all your notes, movie watchlist items, and study routines to a JSON file or restore from a previous backup.</p>
 
         <div class="backup-box">
           <div class="backup-action-row">
@@ -480,7 +504,7 @@
               <strong>Export Backup</strong>
               <p class="help-text">Download a snapshot of all notes, categories, and progress.</p>
             </div>
-            <button class="btn btn-primary" id="downloadBackupBtn">Download JSON</button>
+            <button class="btn btn-primary apple-btn-glow" id="downloadBackupBtn">Download JSON</button>
           </div>
         </div>
 

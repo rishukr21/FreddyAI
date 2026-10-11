@@ -344,34 +344,47 @@ function renderNotes() {
   }
   elements.emptyState.style.display = 'none';
 
-  state.notes.forEach(note => {
-    const card = createNoteCardElement(note);
+  state.notes.forEach((note, index) => {
+    const card = createNoteCardElement(note, index);
     elements.notesContainer.appendChild(card);
   });
 }
 
-function createNoteCardElement(note) {
+function createNoteCardElement(note, index = 0) {
   const card = document.createElement('div');
   card.className = `note-card ${note.is_pinned ? 'pinned' : ''}`;
   card.dataset.id = note.id;
+  card.style.animationDelay = `${Math.min(index * 0.04, 0.32)}s`;
 
-  // Background tint if not default
-  if (note.color && note.color !== 'default') {
-    card.style.backgroundColor = note.color;
-    if (state.theme === 'dark') {
-      card.style.backgroundColor = 'var(--bg-card)';
-      card.style.borderLeft = `5px solid ${note.color}`;
-    }
+  // Apple Ambient Tint Glow (replaces cheap flat background fills)
+  const tintMap = {
+    '#ffe4e6': 'rose',
+    '#dbeafe': 'blue',
+    '#fef3c7': 'amber',
+    '#dcfce7': 'emerald',
+    '#f3e8ff': 'purple'
+  };
+
+  if (note.color && tintMap[note.color]) {
+    card.dataset.tint = tintMap[note.color];
+  } else if (note.note_type === 'movie') {
+    card.dataset.tint = 'rose';
+  } else if (note.note_type === 'study') {
+    card.dataset.tint = 'blue';
+  } else if (note.color && note.color.startsWith('#') && note.color !== '#ffffff') {
+    card.style.background = `radial-gradient(ellipse at 92% 8%, ${note.color}26 0%, transparent 65%), var(--glass-card)`;
   }
 
   // Priority Dot
   const priorityHtml = `<span class="priority-dot ${note.priority || 'medium'}" title="Priority: ${note.priority}"></span>`;
 
-  // Category Badge
+  // Category Badge (Apple Frosted Pill)
   let catBadgeHtml = '';
   if (note.category_name) {
+    const catColor = note.category_color || 'var(--apple-blue)';
     catBadgeHtml = `
-      <span class="cat-badge" style="border-left: 3px solid ${note.category_color || '#6366f1'}">
+      <span class="cat-badge">
+        <span class="cat-color-dot" style="background-color: ${catColor}; color: ${catColor};"></span>
         <span>${note.category_icon || '📁'}</span> ${escapeHtml(note.category_name)}
       </span>
     `;
