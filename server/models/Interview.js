@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const interviewSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
   company: { type: String, required: true },
   role: { type: String, default: 'Software Development Engineer' },
   roundType: { 

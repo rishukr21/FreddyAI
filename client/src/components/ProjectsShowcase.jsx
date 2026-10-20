@@ -11,8 +11,10 @@ import {
   PlusCircle,
   X
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-export default function ProjectsShowcase({ projects = [], onProjectAdded }) {
+export default function ProjectsShowcase({ projects = [], onProjectAdded, onOpenAuthModal }) {
+  const { authFetch, isAuthenticated } = useAuth();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [tagline, setTagline] = useState('');
@@ -22,6 +24,14 @@ export default function ProjectsShowcase({ projects = [], onProjectAdded }) {
   const [liveDemoUrl, setLiveDemoUrl] = useState('');
   const [highlights, setHighlights] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleOpenAddModal = () => {
+    if (!isAuthenticated && onOpenAuthModal) {
+      onOpenAuthModal();
+      return;
+    }
+    setIsAddModalOpen(true);
+  };
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
@@ -41,9 +51,8 @@ export default function ProjectsShowcase({ projects = [], onProjectAdded }) {
     };
 
     try {
-      const res = await fetch('/api/projects', {
+      const res = await authFetch('/api/projects', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
@@ -57,7 +66,8 @@ export default function ProjectsShowcase({ projects = [], onProjectAdded }) {
         setLiveDemoUrl('');
         setHighlights('');
       } else {
-        alert('Failed to save project');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Failed to save project. Please sign in.');
       }
     } catch (err) {
       alert('Error: ' + err.message);
@@ -86,7 +96,7 @@ export default function ProjectsShowcase({ projects = [], onProjectAdded }) {
             {projects.length} Showcased Projects
           </span>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleOpenAddModal}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-black shadow-md shadow-emerald-500/20 transition-all active:scale-95"
           >
             <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -106,7 +116,7 @@ export default function ProjectsShowcase({ projects = [], onProjectAdded }) {
             </p>
           </div>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleOpenAddModal}
             className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition-all shadow-md shadow-emerald-500/20 inline-flex items-center gap-2"
           >
             <PlusCircle className="w-4 h-4 stroke-[2.5]" />

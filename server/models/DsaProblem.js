@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
 
 const dsaProblemSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
   title: { type: String, required: true },
   problemUrl: { type: String, default: '' },
   platform: { type: String, enum: ['LeetCode', 'Codeforces', 'GeeksforGeeks', 'CodeChef', 'Other'], default: 'LeetCode' },
   difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Medium' },
-  topic: { type: String, required: true }, // e.g. 'Dynamic Programming', 'Graphs', 'Trees', 'Binary Search', 'Sliding Window'
+  topic: { type: String, required: true },
   timeComplexity: { type: String, default: 'O(N)' },
   spaceComplexity: { type: String, default: 'O(1)' },
   approach: { type: String, default: '' },

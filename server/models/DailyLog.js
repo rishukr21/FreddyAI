@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 
 const dailyLogSchema = new mongoose.Schema({
-  date: { type: String, required: true, unique: true }, // Format: YYYY-MM-DD
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  date: { type: String, required: true }, // Format: YYYY-MM-DD
   problemsSolvedCount: { type: Number, default: 0 },
   problems: [{
     title: String,
@@ -10,7 +11,7 @@ const dailyLogSchema = new mongoose.Schema({
     platform: String
   }],
   studyHours: { type: Number, default: 0 },
-  csFundamentals: [{ type: String }], // e.g. ["OS: Virtual Memory", "DBMS: Indexing"]
+  csFundamentals: [{ type: String }],
   projectWork: {
     projectName: String,
     taskDescription: String,
@@ -33,5 +34,8 @@ const dailyLogSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Composite unique index so each user can have only one log per date
+dailyLogSchema.index({ userId: 1, date: 1 }, { unique: true });
 
 export const DailyLog = mongoose.model('DailyLog', dailyLogSchema);

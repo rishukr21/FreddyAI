@@ -7,6 +7,7 @@ import { Project } from '../models/Project.js';
 import { evaluateDailyPerformance } from '../services/aiScorer.js';
 import { fetchLeetCodeStats, fetchCodeforcesStats, fetchGithubStats } from '../services/statsFetcher.js';
 import { initialProjects, initialDsaProblems, initialInterviews, initialDailyLogs } from '../services/mockStore.js';
+import { verifyAuth, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -18,9 +19,13 @@ let memoryStore = {
   dailyLogs: [...initialDailyLogs],
 };
 
+// Helper to get active user ID from request (if logged in)
+const getUserId = (req) => req.user?.id || req.query.userId || null;
+
 // --- 1. OVERVIEW & DASHBOARD STATS ---
-router.get('/overview', async (req, res) => {
+router.get('/overview', optionalAuth, async (req, res) => {
   try {
+    const userId = getUserId(req);
     let logs = [];
     let dsaCount = 0;
     let interviewCount = 0;
@@ -28,17 +33,30 @@ router.get('/overview', async (req, res) => {
     let recentProblems = [];
 
     if (getDBStatus()) {
-      logs = await DailyLog.find().sort({ date: -1 }).limit(14);
-      dsaCount = await DsaProblem.countDocuments();
-      interviewCount = await Interview.countDocuments();
-      projectCount = await Project.countDocuments();
-      recentProblems = await DsaProblem.find().sort({ solvedAt: -1 }).limit(5);
+      const filter = userId ? { userId } : {};
+      logs = await DailyLog.find(filter).sort({ date: -1 }).limit(14);
+      dsaCount = await DsaProblem.countDocuments(filter);
+      interviewCount = await Interview.countDocuments(filter);
+      projectCount = await Project.countDocuments(filter);
+      recentProblems = await DsaProblem.find(filter).sort({ solvedAt: -1 }).limit(5);
     } else {
-      logs = [...memoryStore.dailyLogs].sort((a, b) => b.date.localeCompare(a.date));
-      dsaCount = memoryStore.dsaProblems.length;
-      interviewCount = memoryStore.interviews.length;
-      projectCount = memoryStore.projects.length;
-      recentProblems = memoryStore.dsaProblems.slice(0, 5);
+      let filteredLogs = memoryStore.dailyLogs;
+      let filteredDsa = memoryStore.dsaProblems;
+      let filteredInt = memoryStore.interviews;
+      let filteredProj = memoryStore.projects;
+
+      if (userId) {
+        filteredLogs = filteredLogs.filter(l => l.userId === userId);
+        filteredDsa = filteredDsa.filter(d => d.userId === userId);
+        filteredInt = filteredInt.filter(i => i.userId === userId);
+        filteredProj = filteredProj.filter(p => p.userId === userId);
+      }
+
+      logs = [...filteredLogs].sort((a, b) => b.date.localeCompare(a.date));
+      dsaCount = filteredDsa.length;
+      interviewCount = filteredInt.length;
+      projectCount = filteredProj.length;
+      recentProblems = filteredDsa.slice(0, 5);
     }
 
     const latestLog = logs[0] || null;
@@ -62,11 +80,11 @@ router.get('/overview', async (req, res) => {
 });
 
 // --- 2. EXTERNAL STATS (LeetCode / Codeforces / GitHub) ---
-router.get('/external-stats', async (req, res) => {
+router.get('/external-stats', optionalAuth, async (req, res) => {
   try {
-    const lcUser = req.query.leetcode || process.env.LEETCODE_USERNAME || '';
-    const cfUser = req.query.codeforces || process.env.CODEFORCES_USERNAME || '';
-    const ghUser = req.query.github || process.env.GITHUB_USERNAME || '';
+    const lcUser = req.query.leetcode || '';
+    const cfUser = req.query.codeforces || '';
+    const ghUser = req.query.github || '';
 
     const [leetcode, codeforces, github] = await Promise.all([
       fetchLeetCodeStats(lcUser),
@@ -88,12 +106,14 @@ router.get('/external-stats', async (req, res) => {
 });
 
 // --- 3. DSA PROBLEMS ---
-router.get('/dsa', async (req, res) => {
+router.get('/dsa', optionalAuth, async (req, res) => {
   try {
     const { topic, difficulty, status, search } = req.query;
+    const userId = getUserId(req);
 
     if (getDBStatus()) {
       const query = {};
+      if (userId) query.userId = userId;
       if (topic && topic !== 'All') query.topic = topic;
       if (difficulty && difficulty !== 'All') query.difficulty = difficulty;
       if (status && status !== 'All') query.status = status;
@@ -109,6 +129,7 @@ router.get('/dsa', async (req, res) => {
 
     // In-memory filter
     let results = [...memoryStore.dsaProblems];
+    if (userId) results = results.filter(p => p.userId === userId);
     if (topic && topic !== 'All') results = results.filter(p => p.topic === topic);
     if (difficulty && difficulty !== 'All') results = results.filter(p => p.difficulty === difficulty);
     if (status && status !== 'All') results = results.filter(p => p.status === status);
@@ -124,9 +145,9 @@ router.get('/dsa', async (req, res) => {
   }
 });
 
-router.post('/dsa', async (req, res) => {
+router.post('/dsa', verifyAuth, async (req, res) => {
   try {
-    const problemData = req.body;
+    const problemData = { ...req.body, userId: req.user.id };
     if (getDBStatus()) {
       const created = await DsaProblem.create(problemData);
       return res.status(201).json({ success: true, data: created });
@@ -145,21 +166,26 @@ router.post('/dsa', async (req, res) => {
 });
 
 // --- 4. PROJECTS ---
-router.get('/projects', async (req, res) => {
+router.get('/projects', optionalAuth, async (req, res) => {
   try {
+    const userId = getUserId(req);
     if (getDBStatus()) {
-      const projects = await Project.find().sort({ featured: -1, createdAt: -1 });
+      const query = userId ? { userId } : {};
+      const projects = await Project.find(query).sort({ featured: -1, createdAt: -1 });
       return res.json({ success: true, data: projects });
     }
-    res.json({ success: true, data: memoryStore.projects });
+
+    let results = memoryStore.projects;
+    if (userId) results = results.filter(p => p.userId === userId);
+    res.json({ success: true, data: results });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-router.post('/projects', async (req, res) => {
+router.post('/projects', verifyAuth, async (req, res) => {
   try {
-    const data = req.body;
+    const data = { ...req.body, userId: req.user.id };
     if (getDBStatus()) {
       const created = await Project.create(data);
       return res.status(201).json({ success: true, data: created });
@@ -173,21 +199,26 @@ router.post('/projects', async (req, res) => {
 });
 
 // --- 5. INTERVIEW VAULT ---
-router.get('/interviews', async (req, res) => {
+router.get('/interviews', optionalAuth, async (req, res) => {
   try {
+    const userId = getUserId(req);
     if (getDBStatus()) {
-      const interviews = await Interview.find().sort({ date: -1 });
+      const query = userId ? { userId } : {};
+      const interviews = await Interview.find(query).sort({ date: -1 });
       return res.json({ success: true, data: interviews });
     }
-    res.json({ success: true, data: memoryStore.interviews });
+
+    let results = memoryStore.interviews;
+    if (userId) results = results.filter(i => i.userId === userId);
+    res.json({ success: true, data: results });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-router.post('/interviews', async (req, res) => {
+router.post('/interviews', verifyAuth, async (req, res) => {
   try {
-    const data = req.body;
+    const data = { ...req.body, userId: req.user.id };
     if (getDBStatus()) {
       const created = await Interview.create(data);
       return res.status(201).json({ success: true, data: created });
@@ -201,27 +232,34 @@ router.post('/interviews', async (req, res) => {
 });
 
 // --- 6. DAILY LOGS & AI EVALUATION ---
-router.get('/logs', async (req, res) => {
+router.get('/logs', optionalAuth, async (req, res) => {
   try {
+    const userId = getUserId(req);
     if (getDBStatus()) {
-      const logs = await DailyLog.find().sort({ date: -1 });
+      const query = userId ? { userId } : {};
+      const logs = await DailyLog.find(query).sort({ date: -1 });
       return res.json({ success: true, data: logs });
     }
-    res.json({ success: true, data: memoryStore.dailyLogs });
+
+    let results = memoryStore.dailyLogs;
+    if (userId) results = results.filter(l => l.userId === userId);
+    res.json({ success: true, data: results });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-router.post('/logs', async (req, res) => {
+router.post('/logs', verifyAuth, async (req, res) => {
   try {
     const logData = req.body;
+    const userId = req.user.id;
     const date = logData.date || new Date().toISOString().split('T')[0];
 
     // Compute AI Placement Score
     const aiEvaluation = await evaluateDailyPerformance(logData);
     const completeLog = {
       ...logData,
+      userId,
       date,
       problemsSolvedCount: logData.problems?.length || 0,
       aiScore: aiEvaluation
@@ -229,7 +267,7 @@ router.post('/logs', async (req, res) => {
 
     if (getDBStatus()) {
       const updated = await DailyLog.findOneAndUpdate(
-        { date },
+        { userId, date },
         completeLog,
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
@@ -237,7 +275,7 @@ router.post('/logs', async (req, res) => {
     }
 
     // In-memory update or insert
-    const idx = memoryStore.dailyLogs.findIndex(l => l.date === date);
+    const idx = memoryStore.dailyLogs.findIndex(l => l.userId === userId && l.date === date);
     if (idx >= 0) {
       memoryStore.dailyLogs[idx] = { _id: memoryStore.dailyLogs[idx]._id, ...completeLog };
       return res.status(200).json({ success: true, data: memoryStore.dailyLogs[idx] });

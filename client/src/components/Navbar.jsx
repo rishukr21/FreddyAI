@@ -7,10 +7,15 @@ import {
   Briefcase, 
   CalendarClock,
   PlusCircle,
-  ExternalLink
+  LogIn,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-export default function Navbar({ activeTab, setActiveTab, onOpenLogModal }) {
+export default function Navbar({ activeTab, setActiveTab, onOpenLogModal, onOpenAuthModal }) {
+  const { user, isAuthenticated, logout } = useAuth();
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard & AI', icon: LayoutDashboard },
     { id: 'dsa', label: 'DSA Vault', icon: Code2 },
@@ -18,6 +23,14 @@ export default function Navbar({ activeTab, setActiveTab, onOpenLogModal }) {
     { id: 'interviews', label: 'Interview Vault', icon: Briefcase },
     { id: 'timeline', label: 'Journey Timeline', icon: CalendarClock },
   ];
+
+  const handleLogClick = () => {
+    if (!isAuthenticated) {
+      onOpenAuthModal();
+    } else {
+      onOpenLogModal();
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-gray-800/80 bg-[#0b0f19]/90 backdrop-blur-md">
@@ -62,10 +75,40 @@ export default function Navbar({ activeTab, setActiveTab, onOpenLogModal }) {
             })}
           </nav>
 
-          {/* Actions */}
+          {/* Right Actions: Auth & Log Button */}
           <div className="flex items-center gap-2.5">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-900 border border-gray-800">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold font-mono">
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
+                    <p className="text-[10px] text-gray-400 leading-tight">{user.targetRole || 'Candidate'}</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={logout}
+                  className="p-2 rounded-xl bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-400 hover:text-rose-400 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenAuthModal}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-200 transition-all"
+              >
+                <LogIn className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Sign In / Register</span>
+              </button>
+            )}
+
             <button
-              onClick={onOpenLogModal}
+              onClick={handleLogClick}
               className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-black transition-all shadow-md shadow-emerald-500/25 active:scale-95"
             >
               <PlusCircle className="w-4 h-4 stroke-[2.5]" />

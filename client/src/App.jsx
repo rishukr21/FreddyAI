@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import DsaTracker from './components/DsaTracker';
@@ -6,10 +7,13 @@ import ProjectsShowcase from './components/ProjectsShowcase';
 import InterviewArchive from './components/InterviewArchive';
 import Timeline from './components/Timeline';
 import LogModal from './components/LogModal';
+import AuthModal from './components/AuthModal';
 
-export default function App() {
+function MainApp() {
+  const { user, token, authFetch, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
   // Data state
   const [overview, setOverview] = useState(null);
@@ -23,13 +27,20 @@ export default function App() {
   const fetchAllData = async () => {
     try {
       setLoading(true);
+
+      const params = new URLSearchParams();
+      if (user?.leetcodeUsername) params.append('leetcode', user.leetcodeUsername);
+      if (user?.codeforcesUsername) params.append('codeforces', user.codeforcesUsername);
+      if (user?.githubUsername) params.append('github', user.githubUsername);
+      const queryStr = params.toString() ? `?${params.toString()}` : '';
+
       const [ovRes, statsRes, dsaRes, projRes, intRes, logsRes] = await Promise.all([
-        fetch('/api/overview').then(r => r.json()).catch(() => null),
-        fetch('/api/external-stats').then(r => r.json()).catch(() => null),
-        fetch('/api/dsa').then(r => r.json()).catch(() => null),
-        fetch('/api/projects').then(r => r.json()).catch(() => null),
-        fetch('/api/interviews').then(r => r.json()).catch(() => null),
-        fetch('/api/logs').then(r => r.json()).catch(() => null),
+        authFetch('/api/overview').then(r => r.json()).catch(() => null),
+        authFetch(`/api/external-stats${queryStr}`).then(r => r.json()).catch(() => null),
+        authFetch('/api/dsa').then(r => r.json()).catch(() => null),
+        authFetch('/api/projects').then(r => r.json()).catch(() => null),
+        authFetch('/api/interviews').then(r => r.json()).catch(() => null),
+        authFetch('/api/logs').then(r => r.json()).catch(() => null),
       ]);
 
       if (ovRes?.success) setOverview(ovRes.data);
@@ -47,11 +58,19 @@ export default function App() {
 
   useEffect(() => {
     fetchAllData();
-  }, []);
+  }, [token, user]);
 
   const handleLogSuccess = (newLog) => {
     fetchAllData();
     setActiveTab('dashboard');
+  };
+
+  const handleOpenLogModal = () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+    } else {
+      setIsLogModalOpen(true);
+    }
   };
 
   return (
@@ -61,7 +80,8 @@ export default function App() {
       <Navbar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
-        onOpenLogModal={() => setIsLogModalOpen(true)} 
+        onOpenLogModal={handleOpenLogModal}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -77,7 +97,7 @@ export default function App() {
               <Dashboard 
                 overview={overview} 
                 stats={stats} 
-                onOpenLogModal={() => setIsLogModalOpen(true)}
+                onOpenLogModal={handleOpenLogModal}
                 setActiveTab={setActiveTab}
               />
             )}
@@ -86,6 +106,7 @@ export default function App() {
               <DsaTracker 
                 problems={dsaProblems} 
                 onProblemAdded={fetchAllData}
+                onOpenAuthModal={() => setIsAuthModalOpen(true)}
               />
             )}
 
@@ -93,6 +114,7 @@ export default function App() {
               <ProjectsShowcase 
                 projects={projects} 
                 onProjectAdded={fetchAllData}
+                onOpenAuthModal={() => setIsAuthModalOpen(true)}
               />
             )}
 
@@ -100,13 +122,14 @@ export default function App() {
               <InterviewArchive 
                 interviews={interviews} 
                 onInterviewAdded={fetchAllData}
+                onOpenAuthModal={() => setIsAuthModalOpen(true)}
               />
             )}
 
             {activeTab === 'timeline' && (
               <Timeline 
                 logs={logs} 
-                onOpenLogModal={() => setIsLogModalOpen(true)}
+                onOpenLogModal={handleOpenLogModal}
               />
             )}
           </>
@@ -120,20 +143,35 @@ export default function App() {
         onLogSuccess={handleLogSuccess}
       />
 
+      {/* Auth Modal (Login / Register) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={fetchAllData}
+      />
+
       {/* Footer */}
       <footer className="border-t border-gray-900 bg-gray-950/60 py-8 text-center text-xs text-gray-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-mono font-bold text-gray-300">FreddyAI</span>
             <span>—</span>
-            <span>Personal Placement & Coding Journey Tracker</span>
+            <span>Personal Placement & Coding Journey Platform</span>
           </div>
           <p className="text-gray-400 font-mono">
-            Powered by <span className="text-emerald-400 font-semibold">MERN Stack + AI Evaluation</span>
+            Powered by <span className="text-emerald-400 font-semibold">MERN Stack + Multi-User JWT Auth</span>
           </p>
         </div>
       </footer>
 
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }

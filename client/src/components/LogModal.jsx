@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Plus, Trash2, Code2, BookOpen, Clock, GitCommit } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function LogModal({ isOpen, onClose, onLogSuccess }) {
+  const { authFetch } = useAuth();
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [studyHours, setStudyHours] = useState(4);
   const [problems, setProblems] = useState([
@@ -50,9 +52,8 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
     };
 
     try {
-      const res = await fetch('/api/logs', {
+      const res = await authFetch('/api/logs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
@@ -61,7 +62,8 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
         onLogSuccess(data.data);
         onClose();
       } else {
-        alert('Failed to save log. Please ensure the backend is running.');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Failed to save log. Please ensure you are logged in.');
       }
     } catch (err) {
       alert('Error submitting log: ' + err.message);

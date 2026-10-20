@@ -14,8 +14,10 @@ import {
   PlusCircle,
   X
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-export default function DsaTracker({ problems = [], onProblemAdded }) {
+export default function DsaTracker({ problems = [], onProblemAdded, onOpenAuthModal }) {
+  const { authFetch, isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
@@ -64,6 +66,14 @@ export default function DsaTracker({ problems = [], onProblemAdded }) {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  const handleOpenAddModal = () => {
+    if (!isAuthenticated && onOpenAuthModal) {
+      onOpenAuthModal();
+      return;
+    }
+    setIsAddModalOpen(true);
+  };
+
   const handleCreateProblem = async (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
@@ -83,9 +93,8 @@ export default function DsaTracker({ problems = [], onProblemAdded }) {
     };
 
     try {
-      const res = await fetch('/api/dsa', {
+      const res = await authFetch('/api/dsa', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
@@ -96,7 +105,8 @@ export default function DsaTracker({ problems = [], onProblemAdded }) {
         setNewApproach('');
         setNewTags('');
       } else {
-        alert('Failed to save problem');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Failed to save problem. Please sign in.');
       }
     } catch (err) {
       alert('Error: ' + err.message);
@@ -125,7 +135,7 @@ export default function DsaTracker({ problems = [], onProblemAdded }) {
             {filteredProblems.length} of {problems.length} Problems
           </span>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleOpenAddModal}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-black shadow-md shadow-emerald-500/20 transition-all active:scale-95"
           >
             <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -212,7 +222,7 @@ export default function DsaTracker({ problems = [], onProblemAdded }) {
             </div>
             {problems.length === 0 && (
               <button
-                onClick={() => setIsAddModalOpen(true)}
+                onClick={handleOpenAddModal}
                 className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition-all shadow-md shadow-emerald-500/20 inline-flex items-center gap-2"
               >
                 <PlusCircle className="w-4 h-4 stroke-[2.5]" />

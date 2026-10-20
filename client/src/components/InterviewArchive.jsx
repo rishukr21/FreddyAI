@@ -11,8 +11,10 @@ import {
   PlusCircle,
   X
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-export default function InterviewArchive({ interviews = [], onInterviewAdded }) {
+export default function InterviewArchive({ interviews = [], onInterviewAdded, onOpenAuthModal }) {
+  const { authFetch, isAuthenticated } = useAuth();
   const [selectedCompany, setSelectedCompany] = useState('All');
   
   // Modal state
@@ -34,6 +36,14 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded }) 
   const filtered = selectedCompany === 'All' 
     ? interviews 
     : interviews.filter(i => i.company === selectedCompany);
+
+  const handleOpenAddModal = () => {
+    if (!isAuthenticated && onOpenAuthModal) {
+      onOpenAuthModal();
+      return;
+    }
+    setIsAddModalOpen(true);
+  };
 
   const handleCreateInterview = async (e) => {
     e.preventDefault();
@@ -63,9 +73,8 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded }) 
     };
 
     try {
-      const res = await fetch('/api/interviews', {
+      const res = await authFetch('/api/interviews', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
@@ -77,7 +86,8 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded }) 
         setApproachNotes('');
         setLearnings('');
       } else {
-        alert('Failed to save interview record');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Failed to save interview record. Please sign in.');
       }
     } catch (err) {
       alert('Error: ' + err.message);
@@ -103,7 +113,7 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded }) 
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleOpenAddModal}
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-500 hover:bg-purple-400 text-white shadow-md shadow-purple-500/20 transition-all active:scale-95"
           >
             <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -142,7 +152,7 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded }) 
             </p>
           </div>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleOpenAddModal}
             className="px-5 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-xs font-bold transition-all shadow-md shadow-purple-500/20 inline-flex items-center gap-2"
           >
             <PlusCircle className="w-4 h-4 stroke-[2.5]" />
