@@ -1,5 +1,8 @@
 node_modules/
 .DS_Store
-data/*.db-shm
-data/*.db-wal
 *.log
+.env
+dist/
+dist-ssr/
+*.local
+legacy-noteflow/

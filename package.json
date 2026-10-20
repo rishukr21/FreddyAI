@@ -1,13 +1,14 @@
 {
-  "name": "notebook-system",
+  "name": "freddyai",
   "version": "1.0.0",
-  "description": "Category-wise Notebook System with dedicated Movie Watchlist and Daily Study Trackers",
-  "main": "server.js",
+  "description": "FreddyAI - Personal Placement & Coding Journey Tracker (MERN + AI)",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "seed": "npm --prefix server run seed",
+    "log:today": "npm --prefix server run log:today"
   },
-  "keywords": ["notebook", "notes", "categories", "movies", "study", "tracker", "sqlite"],
+  "keywords": ["placement", "coding-journey", "mern", "ai", "leetcode", "dsa"],
   "author": "",
   "license": "MIT"
 }

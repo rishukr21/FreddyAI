@@ -1,126 +1,134 @@
-# 📓 NoteFlow — Category Notebook System
+# 🤖 FreddyAI — Personal Placement & Coding Journey Tracker
 
-A modern, fast, and lightweight category-wise notebook system designed specifically for organizing notes into structured categories, tracking movies to watch, maintaining daily study routines, and capturing ideas.
-
-Powered by **Node.js (v24)** and native **SQLite** (`node:sqlite`) with **zero external npm dependencies**.
+A modern, full-stack **MERN** web platform with built-in **AI Placement Scoring & Daily Evaluation** designed to track coding consistency, DSA mastery, system design, projects, and interview rounds for product-company placements.
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-### 1. 🗂️ Category-Wise Organization
-- Organize notes into custom categories with dedicated emojis/icons and color palettes.
-- Preloaded categories:
-  - 🎬 **Movies to Watch**
-  - 📚 **Daily Study**
-  - 💡 **Ideas & Brainstorming**
-  - 💼 **Work & Projects**
-  - 🌱 **Personal & Health**
-- Add, edit, or delete categories at any time with the built-in Category Manager.
-- Filter notes by category, type, and priority with instant live counts.
+- **🧠 FreddyAI Placement Scoring Engine**:
+  - Automatically scores your day from **0 to 100** based on problem-solving difficulty, topic diversity, CS fundamentals (OS, DBMS, CN), and project contributions.
+  - Categorizes your daily placement readiness into candidate tiers (*Top 5% Placement Ready*, *Strong Candidate*, *Competitive Tier*).
+  - Outlines key observed strengths, critical gaps, and **generates high-impact targets for tomorrow**.
+  - Supports local heuristic intelligence out-of-the-box, with optional **Google Gemini API** integration for deep natural language critique.
 
-### 2. 🎬 Movie Watchlist & Tracker
-- Specialized note layout for movies and TV series.
-- Track:
-  - **Watch Status**: *Plan to Watch*, *Watching Now*, *Watched*, *Favorite*.
-  - **Star Rating**: 1 to 5 stars.
-  - **Streaming Platform**: Netflix, Prime Video, Apple TV, Theater, etc.
-  - **Genre & Release Year**: e.g., Sci-Fi, Christopher Nolan (2014).
-  - **Movie Notes & Reviews**.
-- One-click status toggling directly from the card.
+- **🧩 DSA Question Vault**:
+  - Filterable by topic (*Dynamic Programming, Graphs, Trees, Heap, Two Pointers, Design, etc.*).
+  - Filterable by difficulty (*Easy, Medium, Hard*) and review status (*Solved, Mastered, Needs Revisit*).
+  - Expandable cards showing time & space complexity, optimal approaches, edge cases, and tags.
 
-### 3. 📚 Daily Study Checklist & Habit Tracker
-- Dedicated study tracker for daily preparation (DSA, System Design, Certifications, etc.).
-- **Interactive Checkboxes**: Click items directly on the note card to mark them done—updates the database instantly without opening the editor.
-- **Dynamic Progress Bar**: Real-time completion percentage (e.g. `3 of 4 done (75%)`).
-- **"🔄 Reset for Today" Button**: One-click daily reset to uncheck all items for your next study session.
-- Track study cadence (Daily, Weekdays, Weekly) and target daily study minutes.
+- **📊 Live External Competitive Sync**:
+  - **LeetCode API**: Total solved count, Easy / Medium / Hard breakdown, and global ranking.
+  - **Codeforces API**: Live rating, max rating, and rank title.
+  - **GitHub**: Public repositories, followers, and active project showcase.
 
-### 4. 🔍 Instant Search & Filtering
-- Live real-time search across titles, content, tags, movie metadata, and categories.
-- Filter by:
-  - **Type**: Standard Notes, Movies, Study Checklists.
-  - **Priority**: High (🔴), Medium (🟡), Low (🟢).
-  - **Sort**: Pinned & Updated, Newest First, Oldest First, Alphabetical (A-Z), Priority.
-- Toggle between **Grid View (🔲)** and **List View (📋)**.
+- **🚀 Engineering Projects Showcase**:
+  - Rich project cards with live demo links, source code, architecture highlights, and tech stack tags.
 
-### 5. 📌 Pinning & Visual Customization
-- Pin important notes to the top with glow indicators.
-- Custom card tints (Rose, Blue, Amber, Mint, Lavender) for visual grouping.
-- Markdown toolbar for bold, italic, bullet lists, code blocks, and blockquotes.
+- **💼 Company Interview Archive & Mocks**:
+  - Real campus placement and mock interview archives (Google, Amazon, Atlassian, Microsoft, etc.).
+  - Questions asked by interviewers, difficulty levels, candidate approaches, and key interview takeaways.
 
-### 6. 🌙 Dark Mode & Backup
-- Seamless dark and light themes with preference saved in `localStorage`.
-- Full JSON export and restore for data backup.
+- **📓 Chronological Devlogs & Timeline**:
+  - Transparent daily journal tracking your study hours, problems tackled, and daily AI score badges.
+
+- **⚡ Fast Daily Logging**:
+  - Log your day in seconds using the UI modal or directly through the terminal with `npm run log:today`.
 
 ---
 
-## 🚀 Quick Start
+## 🏗️ Architecture & Tech Stack
 
-### 1. Run the Server
-Ensure you have Node.js (v22+ or v24+) installed:
+- **Frontend**: React (Vite), Tailwind CSS, Lucide Icons, Modern Developer Dark Theme.
+- **Backend**: Node.js, Express.js REST API.
+- **Database**: MongoDB with Mongoose (includes automatic fallback in-memory store so it runs instantly even before MongoDB is booted).
+- **AI Scoring**: Heuristic multi-dimensional evaluator + optional Google Gemini 1.5 Flash integration.
 
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Install Dependencies
 ```bash
-npm start
-# or
-node server.js
+# Install server dependencies
+cd server && npm install
+
+# Install client dependencies
+cd ../client && npm install
 ```
 
-### 2. Open in Your Browser
-Visit:
+### 2. Configure Environment (Optional)
+Edit `server/.env` if you'd like to connect to MongoDB Atlas or provide your public handles:
+```env
+PORT=5001
+MONGODB_URI=mongodb://127.0.0.1:27017/freddyai
+GEMINI_API_KEY=your_gemini_api_key_here
+LEETCODE_USERNAME=your_leetcode_handle
+CODEFORCES_USERNAME=your_codeforces_handle
+GITHUB_USERNAME=your_github_username
 ```
-http://localhost:3000
+*(Note: If MongoDB is not running locally, FreddyAI automatically enables its in-memory store so you can test and use the UI immediately).*
+
+### 3. Start the Project
+
+In separate terminal windows (or concurrently):
+
+**Start the Backend Server (Port 5001):**
+```bash
+npm run dev:server
 ```
+
+**Start the React Client (Port 5173):**
+```bash
+npm run dev:client
+```
+
+Open your browser at **`http://localhost:5173`** to access FreddyAI!
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## ⚡ Fast Terminal Logging CLI
 
-| Shortcut | Action |
-| :--- | :--- |
-| `Cmd/Ctrl + K` or `/` | Focus search bar |
-| `Cmd/Ctrl + N` | Create a new note |
-| `Escape` | Close any active modal or drawer |
+Want to log today's coding progress without opening a browser?
+```bash
+npm run log:today
+```
+Enter your problems, study hours, and notes—FreddyAI will immediately evaluate your daily performance and print your score and tomorrow's targets in your terminal!
 
 ---
 
-## 📁 Project Architecture
+## 📁 Project Structure
 
-```
+```text
 Notebook-system-antigravity/
-├── server.js              # Native Node.js HTTP server & RESTful API router
-├── db.js                  # Native SQLite (node:sqlite) schema, queries, seeds & WAL mode
-├── data/
-│   └── notebook.db        # Local SQLite database (auto-created with sample data)
-├── public/
-│   ├── index.html         # Semantic HTML5 single-page application interface
-│   ├── css/
-│   │   └── style.css      # Modern SaaS design system with CSS variables & responsive layout
-│   └── js/
-│       ├── api.js         # Client-side API fetch client
-│       └── app.js         # Reactive UI state, category manager, modal handlers & shortcuts
-├── package.json           # Scripts and project metadata (0 external npm dependencies)
-└── README.md              # Documentation and guide
+├── client/                     # React Frontend (Vite + Tailwind CSS)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Dashboard.jsx   # AI Placement Scorecard & Profile Sync
+│   │   │   ├── DsaTracker.jsx  # Question Vault & Topic Filters
+│   │   │   ├── ProjectsShowcase.jsx
+│   │   │   ├── InterviewArchive.jsx
+│   │   │   ├── Timeline.jsx    # Dev Journey & Log History
+│   │   │   └── LogModal.jsx    # Fast activity logger
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── tailwind.config.js
+│   └── package.json
+│
+├── server/                     # Express REST API & AI Engine
+│   ├── config/db.js            # MongoDB connection with offline fallback
+│   ├── models/                 # Mongoose schemas (DsaProblem, DailyLog, Interview, Project)
+│   ├── routes/api.js           # API endpoints
+│   ├── services/
+│   │   ├── aiScorer.js         # Daily scoring algorithm & Gemini integration
+│   │   ├── statsFetcher.js     # LeetCode, Codeforces, GitHub sync
+│   │   └── mockStore.js        # Seed / mock data store
+│   ├── scripts/
+│   │   ├── seedData.js         # Database seeder
+│   │   └── logDayCli.js        # Terminal daily logger
+│   ├── server.js
+│   └── package.json
+│
+└── legacy-noteflow/            # Archived previous notebook files
 ```
-
----
-
-## 🔌 REST API Endpoints
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/categories` | Retrieve all categories with note counts |
-| `POST` | `/api/categories` | Create a new category |
-| `PUT` | `/api/categories/:id` | Update a category (name, icon, color, desc) |
-| `DELETE` | `/api/categories/:id` | Delete a category (notes are safely kept) |
-| `GET` | `/api/notes` | Query notes with search, category, type, and priority filters |
-| `POST` | `/api/notes` | Create a new note |
-| `GET` | `/api/notes/:id` | Fetch a single note |
-| `PUT` | `/api/notes/:id` | Update an existing note |
-| `DELETE` | `/api/notes/:id` | Delete a note |
-| `PATCH` | `/api/notes/:id/pin` | Toggle pin status |
-| `PATCH` | `/api/notes/:id/checklist` | Toggle checklist item completion |
-| `POST` | `/api/notes/:id/checklist/reset` | Reset study checklist for the day |
-| `GET` | `/api/stats` | Overview counts (total notes, movies watched, study tasks) |
-| `GET` | `/api/export` | Download complete JSON backup |
-| `POST` | `/api/import` | Restore from JSON backup |
