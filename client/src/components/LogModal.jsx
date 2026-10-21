@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Sparkles, Plus, Trash2, Code2, BookOpen, Clock, GitCommit } from 'lucide-react';
+import { X, Sparkles, Plus, Trash2, Code2, BookOpen, Clock, GitCommit, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import confetti from 'canvas-confetti';
 
 export default function LogModal({ isOpen, onClose, onLogSuccess }) {
   const { authFetch } = useAuth();
@@ -14,6 +15,7 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
   const [projectTask, setProjectTask] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [evaluationResult, setEvaluationResult] = useState(null);
 
   if (!isOpen) return null;
 
@@ -34,6 +36,7 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setEvaluationResult(null);
 
     const validProblems = problems.filter(p => p.title.trim().length > 0);
     const parsedCs = csTopics ? csTopics.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -59,8 +62,23 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
 
       if (res.ok) {
         const data = await res.json();
-        onLogSuccess(data.data);
-        onClose();
+        const score = data.data?.aiScore?.totalScore || 75;
+
+        // Trigger confetti for high score!
+        if (score >= 80) {
+          confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+
+        setEvaluationResult(data.data?.aiScore);
+        setTimeout(() => {
+          onLogSuccess(data.data);
+          onClose();
+          setEvaluationResult(null);
+        }, 1600);
       } else {
         const errData = await res.json().catch(() => ({}));
         alert(errData.error || 'Failed to save log. Please ensure you are logged in.');
@@ -74,44 +92,61 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-      <div className="glass-panel w-full max-w-2xl rounded-3xl border border-gray-700 p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative shadow-2xl bg-[#0f1422]">
+      <div className="bento-card w-full max-w-2xl border-border p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative shadow-2xl bg-surface">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-gray-800/60 transition-colors"
+          type="button"
+          aria-label="Close modal"
+          className="absolute top-5 right-5 text-foreground-muted hover:text-foreground p-2 rounded-xl bg-surface-elevated transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">Record Daily Coding Activity</h3>
-            <p className="text-xs text-gray-400">FreddyAI will analyze your inputs and calculate your daily placement readiness score.</p>
+            <h3 className="text-xl font-heading font-bold text-foreground">Record Daily Coding Activity</h3>
+            <p className="text-xs text-foreground-secondary">FreddyAI evaluates difficulty, consistency, and CS depth in real-time.</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Instant Evaluation Success Banner */}
+        {evaluationResult && (
+          <div className="mb-6 p-4 rounded-subcard bg-amber-500/15 border border-amber-500/30 animate-fadeIn text-foreground">
+            <div className="flex items-center gap-2 mb-1">
+              <CheckCircle2 className="w-5 h-5 text-amber-500" />
+              <h4 className="text-sm font-heading font-bold">
+                Logged Successfully! Daily Placement Score: {evaluationResult.totalScore}/100
+              </h4>
+            </div>
+            <p className="text-xs text-foreground-secondary">
+              {evaluationResult.recommendation}
+            </p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
           
           {/* Date & Study Hours */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-gray-300 block mb-1">Date</label>
+              <label className="text-xs font-semibold text-foreground-secondary block mb-1">Session Date</label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground focus:outline-none focus:border-amber-500"
                 required
               />
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-300 block mb-1">Focused Hours (DSA + Dev)</label>
+              <label className="text-xs font-semibold text-foreground-secondary block mb-1">Focused Hours (DSA + Dev)</label>
               <input
                 type="number"
                 step="0.5"
@@ -119,7 +154,7 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
                 max="24"
                 value={studyHours}
                 onChange={(e) => setStudyHours(e.target.value)}
-                className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground focus:outline-none focus:border-amber-500 font-mono"
                 required
               />
             </div>
@@ -128,27 +163,27 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
           {/* Problems Solved Section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
-                <Code2 className="w-4 h-4 text-emerald-400" /> DSA Problems Tackled Today
+              <label className="text-xs font-semibold text-foreground-secondary flex items-center gap-1.5 font-heading">
+                <Code2 className="w-4 h-4 text-amber-500" /> DSA Problems Solved Today
               </label>
               <button
                 type="button"
                 onClick={handleAddProblem}
-                className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold"
+                className="text-xs text-amber-500 hover:text-amber-600 flex items-center gap-1 font-bold"
               >
-                <Plus className="w-3.5 h-3.5" /> Add Problem
+                <Plus className="w-3.5 h-3.5" /> Add Row
               </button>
             </div>
 
             {problems.map((prob, idx) => (
-              <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-gray-900/60 p-3 rounded-2xl border border-gray-800">
+              <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-surface-elevated/60 p-3 rounded-subcard border border-border">
                 <div className="sm:col-span-5">
                   <input
                     type="text"
                     placeholder="Problem title (e.g. Trapping Rain Water)"
                     value={prob.title}
                     onChange={(e) => handleProblemChange(idx, 'title', e.target.value)}
-                    className="w-full px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-1.5 bg-surface border border-border rounded-chip text-xs text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
@@ -156,7 +191,7 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
                   <select
                     value={prob.topic}
                     onChange={(e) => handleProblemChange(idx, 'topic', e.target.value)}
-                    className="w-full px-2 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none"
+                    className="w-full px-2 py-1.5 bg-surface border border-border rounded-chip text-xs text-foreground focus:outline-none"
                   >
                     <option value="Dynamic Programming">Dynamic Programming</option>
                     <option value="Graphs">Graphs</option>
@@ -173,7 +208,7 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
                   <select
                     value={prob.difficulty}
                     onChange={(e) => handleProblemChange(idx, 'difficulty', e.target.value)}
-                    className="w-full px-2 py-1.5 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white focus:outline-none"
+                    className="w-full px-2 py-1.5 bg-surface border border-border rounded-chip text-xs text-foreground focus:outline-none"
                   >
                     <option value="Easy">Easy</option>
                     <option value="Medium">Medium</option>
@@ -186,7 +221,7 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
                     <button
                       type="button"
                       onClick={() => handleRemoveProblem(idx)}
-                      className="text-gray-500 hover:text-rose-400 p-1"
+                      className="text-foreground-muted hover:text-rose-500 p-1"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -198,43 +233,43 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
 
           {/* CS Fundamentals */}
           <div>
-            <label className="text-xs font-semibold text-gray-300 block mb-1 flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-cyan-400" /> Core CS Topics Revised (comma-separated)
+            <label className="text-xs font-semibold text-foreground-secondary block mb-1 flex items-center gap-1.5 font-heading">
+              <BookOpen className="w-3.5 h-3.5 text-teal-500" /> Core CS Topics Revised (comma-separated)
             </label>
             <input
               type="text"
-              placeholder="e.g. OS: Virtual Memory, DBMS: Normalization, System Design: Caching"
+              placeholder="e.g. OS: Virtual Memory, DBMS: Indexing, CN: TCP Handshake"
               value={csTopics}
               onChange={(e) => setCsTopics(e.target.value)}
-              className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-amber-500"
             />
           </div>
 
           {/* Project Work */}
           <div>
-            <label className="text-xs font-semibold text-gray-300 block mb-1 flex items-center gap-1.5">
-              <GitCommit className="w-3.5 h-3.5 text-purple-400" /> Project Work Accomplished
+            <label className="text-xs font-semibold text-foreground-secondary block mb-1 flex items-center gap-1.5 font-heading">
+              <GitCommit className="w-3.5 h-3.5 text-amber-500" /> Project Work Accomplished
             </label>
             <input
               type="text"
-              placeholder="e.g. Implemented WebSockets CRDT sync and dockerized the runner"
+              placeholder="e.g. Built JWT token auth and optimized MongoDB queries"
               value={projectTask}
               onChange={(e) => setProjectTask(e.target.value)}
-              className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+              className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-amber-500"
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="text-xs font-semibold text-gray-300 block mb-1">
-              Personal Journal Note & Reflections
+            <label className="text-xs font-semibold text-foreground-secondary block mb-1">
+              Personal Dev Reflection & Edge Cases Learned
             </label>
             <textarea
               rows="2"
-              placeholder="What went well today? What edge cases or blockers did you crack?"
+              placeholder="What intuition or edge cases did you master today?"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 resize-none"
+              className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-amber-500 resize-none font-sans"
             ></textarea>
           </div>
 
@@ -243,17 +278,17 @@ export default function LogModal({ isOpen, onClose, onLogSuccess }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              className="px-4 py-2 rounded-chip text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2.5 rounded-xl text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2"
+              className="px-6 py-2.5 rounded-chip text-sm font-bold bg-amber-500 hover:bg-amber-600 text-black shadow-sm active:scale-95 transition-all flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4 fill-black" />
-              {isSubmitting ? 'Evaluating with AI...' : 'Submit & Compute AI Score'}
+              {isSubmitting ? 'Evaluating Performance...' : 'Submit & Compute Score'}
             </button>
           </div>
 

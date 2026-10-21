@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { 
   Briefcase, 
-  Building2, 
   Calendar, 
   Star, 
   HelpCircle, 
   Lightbulb, 
   CheckCircle2, 
-  Layers,
   PlusCircle,
   X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import Card from './common/Card';
+import Chip from './common/Chip';
+import EmptyState from './common/EmptyState';
 
 export default function InterviewArchive({ interviews = [], onInterviewAdded, onOpenAuthModal }) {
   const { authFetch, isAuthenticated } = useAuth();
@@ -102,22 +103,23 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2.5">
-            <Briefcase className="w-6 h-6 text-purple-400" />
-            Company Interview Archive & Mocks
+          <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground flex items-center gap-2.5">
+            <Briefcase className="w-7 h-7 text-teal-500" />
+            Interview Vault & Experiences
           </h2>
-          <p className="text-sm text-gray-400 mt-0.5">
-            Real campus placement rounds, technical problem deep dives, and key learnings from engineering interviewers.
+          <p className="text-sm text-foreground-secondary mt-0.5">
+            Company placement rounds, technical problem deep dives, and key interviewer takeaways.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handleOpenAddModal}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-500 hover:bg-purple-400 text-white shadow-md shadow-purple-500/20 transition-all active:scale-95"
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 rounded-chip text-sm font-bold bg-amber-500 hover:bg-amber-600 text-black shadow-sm transition-all active:scale-95"
           >
-            <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
-            Log Interview Round
+            <PlusCircle className="w-4 h-4 stroke-[2.2]" />
+            <span>Log Interview</span>
           </button>
         </div>
       </div>
@@ -129,10 +131,11 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
             <button
               key={c}
               onClick={() => setSelectedCompany(c)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
+              type="button"
+              className={`px-3 py-1.5 rounded-chip text-xs font-medium whitespace-nowrap transition-colors ${
                 selectedCompany === c
-                  ? 'bg-purple-500 text-white font-semibold'
-                  : 'bg-gray-900 text-gray-400 hover:text-white border border-gray-800'
+                  ? 'bg-amber-500 text-black font-semibold'
+                  : 'bg-surface-elevated text-foreground-muted hover:text-foreground border border-border'
               }`}
             >
               {c}
@@ -143,53 +146,46 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
 
       {/* Empty State or Interview Cards */}
       {interviews.length === 0 ? (
-        <div className="glass-panel p-12 text-center rounded-3xl border border-gray-800 space-y-4">
-          <Briefcase className="w-12 h-12 text-gray-600 mx-auto" />
-          <div className="space-y-1">
-            <h4 className="text-base font-semibold text-gray-200">No Interview Experiences Logged Yet</h4>
-            <p className="text-xs text-gray-400 max-w-md mx-auto">
-              Record technical questions from mock interviews, online assessments, and on-campus rounds to build your personalized placement cheat sheet.
-            </p>
-          </div>
-          <button
-            onClick={handleOpenAddModal}
-            className="px-5 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-xs font-bold transition-all shadow-md shadow-purple-500/20 inline-flex items-center gap-2"
-          >
-            <PlusCircle className="w-4 h-4 stroke-[2.5]" />
-            Log Your First Interview
-          </button>
-        </div>
+        <EmptyState
+          icon={Briefcase}
+          title="No Interview Experiences Logged Yet"
+          description="Record questions asked during technical interviews, online assessments, and mock rounds to build your personal company preparation vault."
+          actionLabel="Log Your First Interview"
+          onAction={handleOpenAddModal}
+        />
       ) : (
         <div className="space-y-5">
           {filtered.map((item) => (
             <div 
               key={item._id}
-              className="glass-panel rounded-3xl p-6 sm:p-7 border border-gray-800 hover:border-purple-500/30 transition-all bg-gradient-to-br from-gray-900/50 via-gray-950/60 to-purple-950/10 shadow-xl"
+              className="bento-card p-6 sm:p-7 border-border hover:border-teal-500/35 transition-all bg-surface"
             >
               {/* Header info */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-800/80">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-lg font-mono">
+                  <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-500 font-bold text-lg font-heading">
                     {item.company.charAt(0)}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-bold text-white">{item.company}</h3>
-                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30 font-medium">
-                        {item.roundType}
-                      </span>
+                      <h3 className="text-xl font-heading font-bold text-foreground">{item.company}</h3>
+                      <Chip 
+                        label={item.roundType} 
+                        variant="teal" 
+                        size="sm" 
+                      />
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">{item.role}</p>
+                    <p className="text-xs text-foreground-muted mt-0.5">{item.role}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs font-mono text-gray-400">
+                <div className="flex items-center gap-4 text-xs font-mono text-foreground-muted">
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    <Calendar className="w-3.5 h-3.5 text-foreground-muted" />
                     {new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
-                  <span className="flex items-center gap-1 text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/30">
-                    <Star className="w-3.5 h-3.5 fill-amber-400" /> {item.rating}/10
+                  <span className="flex items-center gap-1 text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-chip border border-amber-500/30 font-bold">
+                    <Star className="w-3.5 h-3.5 fill-amber-500" /> {item.rating}/10
                   </span>
                 </div>
               </div>
@@ -197,7 +193,7 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
               {/* Experience Summary */}
               {item.experienceSummary && (
                 <div className="mt-4">
-                  <p className="text-xs text-gray-300 leading-relaxed">
+                  <p className="text-xs text-foreground-secondary leading-relaxed">
                     {item.experienceSummary}
                   </p>
                 </div>
@@ -206,44 +202,47 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
               {/* Questions Asked */}
               {item.questionsAsked && item.questionsAsked.length > 0 && (
                 <div className="mt-5 space-y-2.5">
-                  <h4 className="text-xs uppercase font-bold text-gray-400 tracking-wider flex items-center gap-1.5">
-                    <HelpCircle className="w-3.5 h-3.5 text-cyan-400" /> Questions Posed by Interviewer
+                  <h4 className="text-xs uppercase font-bold text-foreground-muted tracking-wider flex items-center gap-1.5 font-heading">
+                    <HelpCircle className="w-3.5 h-3.5 text-teal-500" /> Questions Posed by Interviewer
                   </h4>
                   <div className="space-y-2">
-                    {item.questionsAsked.map((q, idx) => (
-                      <div key={idx} className="bg-gray-950/60 p-4 rounded-2xl border border-gray-800/80 space-y-2">
-                        <div className="flex items-start justify-between gap-3">
-                          <p className="text-sm font-semibold text-white">
-                            "{q.questionText}"
-                          </p>
-                          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                            q.difficulty === 'Hard' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' :
-                            'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                          }`}>
-                            {q.difficulty}
-                          </span>
+                    {item.questionsAsked.map((q, idx) => {
+                      const diffVariant = (q.difficulty || '').toLowerCase() === 'hard' ? 'hard' :
+                                          (q.difficulty || '').toLowerCase() === 'medium' ? 'medium' : 'easy';
+                      return (
+                        <div key={idx} className="bg-surface-elevated/60 p-4 rounded-subcard border border-border space-y-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-sm font-semibold font-heading text-foreground">
+                              "{q.questionText}"
+                            </p>
+                            <Chip 
+                              label={q.difficulty || 'Medium'} 
+                              variant={diffVariant} 
+                              size="sm" 
+                            />
+                          </div>
+                          {q.notes && (
+                            <p className="text-xs text-foreground-secondary bg-surface p-2.5 rounded-lg border border-border font-mono">
+                              Approach: {q.notes}
+                            </p>
+                          )}
                         </div>
-                        {q.notes && (
-                          <p className="text-xs text-gray-400 bg-gray-900/40 p-2.5 rounded-xl border border-gray-800/60 font-mono">
-                            Approach: {q.notes}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
               {/* Key Learnings */}
               {item.keyLearnings && item.keyLearnings.length > 0 && (
-                <div className="mt-5 pt-4 border-t border-gray-800/80">
-                  <h4 className="text-xs uppercase font-bold text-amber-400 tracking-wider flex items-center gap-1.5 mb-2">
+                <div className="mt-5 pt-4 border-t border-border">
+                  <h4 className="text-xs uppercase font-bold text-amber-500 tracking-wider flex items-center gap-1.5 mb-2 font-heading">
                     <Lightbulb className="w-3.5 h-3.5" /> Interview Takeaways & Advice
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
                     {item.keyLearnings.map((learning, idx) => (
-                      <div key={idx} className="flex items-start gap-2 bg-gray-950/40 p-3 rounded-xl border border-gray-800 text-xs text-gray-300">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <div key={idx} className="flex items-start gap-2 bg-surface-elevated/40 p-3 rounded-lg border border-border text-xs text-foreground-secondary">
+                        <CheckCircle2 className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" />
                         <span>{learning}</span>
                       </div>
                     ))}
@@ -259,56 +258,57 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
       {/* Add Interview Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="glass-panel w-full max-w-xl rounded-3xl border border-gray-700 p-6 sm:p-7 max-h-[90vh] overflow-y-auto relative shadow-2xl bg-[#0f1422]">
+          <div className="bento-card w-full max-w-xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto relative shadow-2xl bg-surface border-border">
             <button
               onClick={() => setIsAddModalOpen(false)}
-              className="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-gray-800/60 transition-colors"
+              type="button"
+              className="absolute top-5 right-5 text-foreground-muted hover:text-foreground p-2 rounded-xl bg-surface-elevated transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+              <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-500">
                 <Briefcase className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Log Interview / Mock Experience</h3>
-                <p className="text-xs text-gray-400">Record rounds, questions asked, and key interviewer feedback.</p>
+                <h3 className="text-lg font-heading font-bold text-foreground">Log Interview Experience</h3>
+                <p className="text-xs text-foreground-muted">Document rounds, technical questions, and interview insights.</p>
               </div>
             </div>
 
             <form onSubmit={handleCreateInterview} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-300 block mb-1">Company / Organization</label>
+                  <label className="text-xs font-semibold text-foreground-secondary block mb-1">Company / Organization</label>
                   <input
                     type="text"
-                    placeholder="e.g. Google, Amazon, Mock Interview"
+                    placeholder="e.g. Google, Amazon, Uber"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground focus:outline-none focus:border-amber-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-300 block mb-1">Role</label>
+                  <label className="text-xs font-semibold text-foreground-secondary block mb-1">Role</label>
                   <input
                     type="text"
-                    placeholder="Software Engineer Intern / SDE-1"
+                    placeholder="SDE-1 / Software Intern"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none"
+                    className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-300 block mb-1">Round Type</label>
+                  <label className="text-xs font-semibold text-foreground-secondary block mb-1">Round Type</label>
                   <select
                     value={roundType}
                     onChange={(e) => setRoundType(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none"
+                    className="w-full px-3 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground focus:outline-none"
                   >
                     <option value="Online Assessment">Online Assessment (OA)</option>
                     <option value="Technical Round 1">Technical Round 1</option>
@@ -319,52 +319,52 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-300 block mb-1">Self-Rating (1-10)</label>
+                  <label className="text-xs font-semibold text-foreground-secondary block mb-1">Self-Rating (1-10)</label>
                   <input
                     type="number"
                     min="1"
                     max="10"
                     value={rating}
                     onChange={(e) => setRating(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none"
+                    className="w-full px-3 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground font-mono focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-300 block mb-1">Experience Summary</label>
+                <label className="text-xs font-semibold text-foreground-secondary block mb-1">Experience Summary</label>
                 <textarea
                   rows="2"
-                  placeholder="How did the round go? What was the interviewer's focus?"
+                  placeholder="How did the interviewer conduct the round? What was their focus?"
                   value={experienceSummary}
                   onChange={(e) => setExperienceSummary(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none resize-none"
+                  className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground focus:outline-none resize-none font-sans"
                 ></textarea>
               </div>
 
-              <div className="bg-gray-950/40 p-3.5 rounded-2xl border border-gray-800/80 space-y-3">
-                <span className="text-xs font-bold text-gray-300 block">Question Posed in this Round</span>
+              <div className="bg-surface-elevated/60 p-3.5 rounded-subcard border border-border space-y-3">
+                <span className="text-xs font-bold text-foreground font-heading block">Question Posed in this Round</span>
                 <div>
                   <input
                     type="text"
-                    placeholder="Question description or title..."
+                    placeholder="Question title or problem statement..."
                     value={questionText}
                     onChange={(e) => setQuestionText(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white focus:outline-none"
+                    className="w-full px-3 py-1.5 bg-surface border border-border rounded-chip text-xs text-foreground focus:outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="text"
-                    placeholder="Topic (e.g. Graphs, DP, Sliding Window)"
+                    placeholder="Topic (e.g. Graphs, DP, Heap)"
                     value={questionTopic}
                     onChange={(e) => setQuestionTopic(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white focus:outline-none"
+                    className="w-full px-3 py-1.5 bg-surface border border-border rounded-chip text-xs text-foreground focus:outline-none"
                   />
                   <select
                     value={questionDifficulty}
                     onChange={(e) => setQuestionDifficulty(e.target.value)}
-                    className="w-full px-2 py-1.5 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white focus:outline-none"
+                    className="w-full px-2 py-1.5 bg-surface border border-border rounded-chip text-xs text-foreground focus:outline-none"
                   >
                     <option value="Easy">Easy</option>
                     <option value="Medium">Medium</option>
@@ -374,22 +374,22 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
                 <div>
                   <input
                     type="text"
-                    placeholder="Solution approach notes / edge cases..."
+                    placeholder="Your approach notes and complexity explanation..."
                     value={approachNotes}
                     onChange={(e) => setApproachNotes(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-lg text-xs text-white focus:outline-none"
+                    className="w-full px-3 py-1.5 bg-surface border border-border rounded-chip text-xs text-foreground focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-300 block mb-1">Key Takeaways & Advice (1 per line)</label>
+                <label className="text-xs font-semibold text-foreground-secondary block mb-1">Key Takeaways & Advice (1 per line)</label>
                 <textarea
                   rows="2"
-                  placeholder="Communicate edge cases before writing code&#10;Check integer overflow on multiplication"
+                  placeholder="Communicate trade-offs before writing code&#10;Verify integer overflow bounds"
                   value={learnings}
                   onChange={(e) => setLearnings(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white focus:outline-none resize-none"
+                  className="w-full px-3.5 py-2 bg-surface-elevated border border-border rounded-chip text-sm text-foreground focus:outline-none resize-none font-sans"
                 ></textarea>
               </div>
 
@@ -397,14 +397,14 @@ export default function InterviewArchive({ interviews = [], onInterviewAdded, on
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 text-sm text-gray-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-foreground-muted hover:text-foreground"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 rounded-xl text-sm font-bold bg-purple-500 hover:bg-purple-400 text-white shadow-lg shadow-purple-500/20"
+                  className="px-5 py-2 rounded-chip text-sm font-bold bg-amber-500 hover:bg-amber-600 text-black shadow-sm"
                 >
                   {isSubmitting ? 'Saving...' : 'Record Experience'}
                 </button>
